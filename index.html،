@@ -1,0 +1,693 @@
+<!DOCTYPE html><html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مترجم تونسي - عربيزي | Traducteur Tunisien</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+  body {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #6a3093 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .container {
+    background: rgba(255,255,255,0.98);
+    border-radius: 25px;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.4);
+    max-width: 900px;
+    width: 100%;
+    padding: 35px;
+  }
+  h1 {
+    text-align: center;
+    color: #2a5298;
+    margin-bottom: 8px;
+    font-size: 28px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #777;
+    margin-bottom: 25px;
+    font-size: 14px;
+  }
+  .lang-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .lang-box {
+    flex: 1;
+    background: #f4f7fc;
+    border-radius: 15px;
+    padding: 15px;
+    border: 2px solid #e0e7f1;
+    transition: all 0.3s;
+  }
+  .lang-box:focus-within {
+    border-color: #2a5298;
+    box-shadow: 0 0 15px rgba(42,82,152,0.2);
+  }
+  .lang-label {
+    font-weight: bold;
+    color: #2a5298;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 15px;
+  }
+  textarea {
+    width: 100%;
+    min-height: 130px;
+    border: none;
+    background: transparent;
+    resize: vertical;
+    font-size: 17px;
+    outline: none;
+    color: #222;
+    line-height: 1.6;
+  }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.25s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+  button:active { transform: translateY(0); }
+  .btn-speak { background: #ffb703; color: #333; }
+  .btn-clear { background: #e63946; color: #fff; }
+  .btn-swap { background: #7209b7; color: #fff; }
+  .btn-translate {
+    background: linear-gradient(135deg, #2a5298, #6a3093);
+    color: #fff;
+    width: 100%;
+    padding: 16px;
+    font-size: 17px;
+    margin: 5px 0;
+    border-radius: 12px;
+  }
+  .btn-translate:hover { filter: brightness(1.15); }
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .status {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    min-height: 18px;
+    margin-top: 5px;
+  }
+  .status.success { color: #2a9d8f; font-weight: bold; }
+  .status.error { color: #e63946; font-weight: bold; }
+  @media (max-width: 650px) {
+    .lang-row { flex-direction: column; }
+    h1 { font-size: 22px; }
+    .container { padding: 20px; }
+  }
+  .speaking {
+    animation: pulse 0.8s infinite alternate;
+  }
+  @keyframes pulse {
+    from { opacity: 1; }
+    to { opacity: 0.5; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🌍 مترجم اللهجة التونسية ↔ العربيزي</h1>
+  <p class="subtitle">ترجمة فورية + نطق صوتي | Traduction & Prononciation</p><div class="lang-row">
+    <div class="lang-box">
+      <div class="lang-label">
+        <span>🇹🇳 اللهجة التونسية (عربي)</span>
+        <button class="btn-speak" onclick="speakText('srcText')" title="نطق">🔊</button>
+      </div>
+      <textarea id="srcText" placeholder="اكتب هنا باللهجة التونسية... مثال: شنوة حالك؟"></textarea>
+      <div class="btn-row">
+        <button class="btn-clear" onclick="clearText('srcText')">🗑️ مسح</button>
+      </div>
+    </div>```
+<div class="lang-box">
+  <div class="lang-label">
+    <span>🔤 العربيزي (Latin)</span>
+    <button class="btn-speak" onclick="speakText('tgtText')" title="نطق">🔊</button>
+  </div>
+  <textarea id="tgtText" placeholder="الترجمة تظهر هنا... مثال: chnowa 7alek?"></textarea>
+  <div class="btn-row">
+    <button class="btn-clear" onclick="clearText('tgtText')">🗑️ مسح</button>
+  </div>
+</div>
+```
+
+</div><div class="controls">
+    <button class="btn-swap" onclick="swapLanguages()">🔄 عكس الاتجاه</button>
+  </div><button class="btn-translate" onclick="translateText()">✨ ترجم الآن / Traduire</button>
+
+<div class="status" id="status"></div>
+</div><script>
+/* ============================================================
+   قاموس شامل للهجة التونسية ↔ العربيزي
+   ============================================================ */
+const dictionary = [
+  // عبارات كاملة (أولوية أعلى - تُطابق أولاً)
+  ["شنوة حالك", "chnowa 7alek"],
+  ["شنو حالك", "chnowa 7alek"],
+  ["شني حالك", "chni 7alek"],
+  ["شنوة أخبارك", "chnowa akhbarek"],
+  ["شنو أخبارك", "chnowa akhbarek"],
+  ["كيفاش حالك", "kifech 7alek"],
+  ["لاباس عليك", "labbas 3lik"],
+  ["لاباس", "labbas"],
+  ["شنوة هذا", "chnowa hedha"],
+  ["شنو هذا", "chnowa hedha"],
+  ["شنوة هذي", "chnowa hedhi"],
+  ["علاش هكا", "3lech hakka"],
+  ["علاش", "3lech"],
+  ["علاش لا", "3lech le"],
+  ["برشا شكرا", "barsha chokran"],
+  ["برشة شكرا", "barsha chokran"],
+  ["يعيشك", "ya3chik"],
+  ["يعيشكم", "ya3chikom"],
+  ["عيشك", "3ichik"],
+  ["صباح الخير", "sbe7 el khir"],
+  ["مسا الخير", "mse el khir"],
+  ["مساء الخير", "mse el khir"],
+  ["تصبح على خير", "tosbe7 3la khir"],
+  ["بسلامة", "bslema"],
+  ["بسلامتك", "bslemetek"],
+  ["إلى اللقاء", "ila le9a"],
+  ["شكون", "chkoun"],
+  ["شنوة", "chnowa"],
+  ["شنو", "chnowa"],
+  ["شني", "chni"],
+  ["كيفاش", "kifech"],
+  ["علاش", "3lech"],
+  ["قداش", "9adech"],
+  ["وقتاش", "wa9tech"],
+  ["فين", "win"],
+  ["وين", "win"],
+  ["منين", "mnin"],
+  ["كيما", "kima"],
+  ["برشا", "barsha"],
+  ["برشة", "barsha"],
+  ["ياخي", "yakhi"],
+  ["زادة", "zeda"],
+  ["تنجم", "tanjem"],
+  ["نحب", "n7eb"],
+  ["تحب", "t7eb"],
+  ["يحب", "y7eb"],
+  ["نعمل", "na3mel"],
+  ["تعمل", "ta3mel"],
+  ["يعمل", "ya3mel"],
+  ["نمشي", "nemchi"],
+  ["تمشي", "temchi"],
+  ["يمشي", "yemchi"],
+  ["نجي", "neji"],
+  ["تجي", "teji"],
+  ["يجي", "yiji"],
+  ["نشوف", "nchouf"],
+  ["تشوف", "tchouf"],
+  ["يشوف", "ychouf"],
+  ["نحكي", "na7ki"],
+  ["تحكي", "ta7ki"],
+  ["يحكي", "ya7ki"],
+  ["ناكل", "nakel"],
+  ["تاكل", "takel"],
+  ["ياكل", "yakel"],
+  ["نشرب", "nchreb"],
+  ["تشرب", "tchreb"],
+  ["يشرب", "ychreb"],
+  ["نعرف", "na3ref"],
+  ["تعرف", "ta3ref"],
+  ["يعرف", "ya3ref"],
+  ["نقدر", "ne9der"],
+  ["تقدر", "te9der"],
+  ["يقدر", "ye9der"],
+  ["خاطر", "khater"],
+  ["علخاطر", "3lakhater"],
+  ["باهي", "behi"],
+  ["باهية", "behya"],
+  ["شبيك", "chbik"],
+  ["شبيكم", "chbikom"],
+  ["عسلامة", "3aslema"],
+  ["السلام عليكم", "asslema 3likom"],
+  ["وعليكم السلام", "wa3likom esslema"],
+  ["مرحبا", "marhba"],
+  ["أهلا", "ahla"],
+  ["تو", "tawa"],
+  ["توا", "tawa"],
+  ["هكا", "hakka"],
+  ["هكة", "hakka"],
+  ["هاك", "hek"],
+  ["هذا", "hedha"],
+  ["هذي", "hedhi"],
+  ["هذوم", "hedhom"],
+  ["هاذم", "hedhom"],
+  ["أنا", "ena"],
+  ["أنت", "enta"],
+  ["أنتي", "enti"],
+  ["هو", "houwa"],
+  ["هي", "hiya"],
+  ["أحنا", "a7na"],
+  ["أنتم", "entom"],
+  ["هما", "houma"],
+  ["معلش", "ma3lech"],
+  ["ماعليش", "ma3lich"],
+  ["صحيح", "s7i7"],
+  ["غلط", "ghalet"],
+  ["شوية", "chwaya"],
+  ["شوي", "chway"],
+  ["قليل", "9lil"],
+  ["كثير", "barsha"],
+  ["زوز", "zouz"],
+  ["ثلاثة", "thletha"],
+  ["أربعة", "arba3a"],
+  ["خمسة", "khamsa"],
+  ["ستة", "setta"],
+  ["سبعة", "sab3a"],
+  ["ثمانية", "thmanya"],
+  ["تسعة", "tes3a"],
+  ["عشرة", "3achra"],
+  ["واحد", "wa7ed"],
+  ["فلوس", "flous"],
+  ["خدمة", "khedma"],
+  ["دار", "dar"],
+  ["ماكلة", "makla"],
+  ["ما", "ma"],
+  ["ماء", "me"],
+  ["خبز", "khobz"],
+  ["حوت", "7out"],
+  ["لحم", "la7m"],
+  ["دجاج", "djaj"],
+  ["كسكسي", "kosksi"],
+  ["بريك", "brik"],
+  ["لبلابي", "lablabi"],
+  ["مقروض", "ma9roud"],
+  ["حلو", "7elou"],
+  ["مر", "morr"],
+  ["سخون", "skhoun"],
+  ["بارد", "bared"],
+  ["كبير", "kbir"],
+  ["صغير", "sghir"],
+  ["طويل", "tawil"],
+  ["قصير", "9sir"],
+  ["جديد", "jdid"],
+  ["قديم", "9dim"],
+  ["مزيان", "mezyen"],
+  ["خايب", "khayeb"],
+  ["ساهل", "sehel"],
+  ["صعيب", "s3ib"],
+  ["سريع", "sri3"],
+  ["بطيء", "bti"],
+  ["قوي", "9wi"],
+  ["ضعيف", "d3if"],
+  ["فرحان", "fer7an"],
+  ["حزين", "7zin"],
+  ["تعبان", "te3ban"],
+  ["مريض", "mrid"],
+  ["عيان", "3yan"],
+  ["جوعان", "jou3an"],
+  ["عطشان", "3atchan"],
+  ["نعسان", "ne3san"],
+  ["بخيل", "bkhil"],
+  ["كريم", "karim"],
+  ["شاطر", "chater"],
+  ["غبي", "ghabi"],
+  ["مجنون", "mejnoun"],
+  ["عاقل", "3a9el"],
+  ["ياخي شنوة", "yakhi chnowa"],
+  ["على خاطر", "3la khater"],
+  ["علاش لا", "3lech le"],
+  ["إن شاء الله", "inchallah"],
+  ["ما شاء الله", "machallah"],
+  ["الحمد لله", "el7amdoulilah"],
+  ["بسم الله", "bismillah"],
+  ["ربي", "rabbi"],
+  ["والله", "wallah"],
+  ["برشا برشا", "barsha barsha"],
+  ["شوية شوية", "chwaya chwaya"],
+  ["كيف كيف", "kif kif"],
+  ["واحد آخر", "wa7ed ekher"],
+  ["حاجة أخرى", "7aja okhra"],
+  ["شنوة رايك", "chnowa rayek"],
+  ["شنو رايك", "chnowa rayek"],
+  ["نحبك", "n7ebek"],
+  ["نموت عليك", "nmout 3lik"],
+  ["توحشتك", "twa7achtek"],
+  ["وحشتني", "wa7achteni"],
+  ["توة", "tawa"],
+  ["أكيد", "akid"],
+  ["بالتأكيد", "bel akid"],
+  ["ممكن", "momken"],
+  ["مستحيل", "mostahil"],
+  ["ضروري", "darouri"],
+  ["مشكل", "mochkel"],
+  ["مشكلة", "mochkla"],
+  ["حل", "7al"],
+  ["سؤال", "so2el"],
+  ["جواب", "jaweb"],
+  ["كلمة", "kelma"],
+  ["جملة", "jemla"],
+  ["كتاب", "ktab"],
+  ["قلم", "9lem"],
+  ["ورقة", "warka"],
+  ["طاولة", "tawla"],
+  ["كرسي", "korsi"],
+  ["باب", "beb"],
+  ["شباك", "chebbek"],
+  ["طريق", "tri9"],
+  ["سيارة", "karhba"],
+  ["طوموبيل", "tomobil"],
+  ["ماشي", "machi"],
+  ["يمشي", "yemchi"],
+  ["وقفة", "wa9fa"],
+  ["سوق", "sou9"],
+  ["حانوت", "7anout"],
+  ["مغازة", "magaza"],
+  ["بحر", "b7ar"],
+  ["جبل", "jbel"],
+  ["شمس", "chems"],
+  ["قمر", "9mer"],
+  ["نحوم", "njoum"],
+  ["سماء", "sme"],
+  ["مطر", "mter"],
+  ["ريح", "ri7"],
+  ["برد", "berd"],
+  ["سخانة", "skhana"],
+  ["صيف", "sif"],
+  ["شتاء", "chta"],
+  ["ربيع", "rbi3"],
+  ["خريف", "khrif"],
+  ["يوم", "youm"],
+  ["ليلة", "lela"],
+  ["صباح", "sbe7"],
+  ["عشية", "3achiya"],
+  ["ليل", "lil"],
+  ["ساعة", "se3a"],
+  ["دقيقة", "d9i9a"],
+  ["ثانية", "thanya"],
+  ["أسبوع", "jom3a"],
+  ["شهر", "chhar"],
+  ["سنة", "sna"],
+  ["عام", "3am"],
+  ["درج", "daraj"],
+  ["فوق", "fou9"],
+  ["تحت", "te7t"],
+  ["قدام", "9dem"],
+  ["وراء", "wra"],
+  ["يمين", "yamin"],
+  ["شمال", "chemel"],
+  ["هنا", "hna"],
+  ["هناك", "ghadi"],
+  ["غادي", "ghadi"],
+  ["برة", "barra"],
+  ["داخل", "dakhel"],
+  ["برا", "barra"],
+  ["مع", "m3a"],
+  ["بلا", "bla"],
+  ["بين", "bin"],
+  ["قبل", "9bel"],
+  ["بعد", "ba3d"],
+  ["دائماً", "dima"],
+  ["أبداً", "3omrek"],
+  ["ربما", "rba3ma"],
+  ["حتى", "7atta"],
+  ["لكن", "lekin"],
+  ["و", "w"],
+  ["أو", "wala"],
+  ["إذا", "iza"],
+  ["كي", "ki"],
+  ["باش", "bech"],
+  ["على", "3la"],
+  ["في", "fi"],
+  ["من", "men"],
+  ["إلى", "ila"],
+  ["عن", "3an"],
+  ["هذا شنوة", "hedha chnowa"],
+  ["شكون هذا", "chkoun hedha"],
+  ["شكون هذي", "chkoun hedhi"],
+  ["قداش هذا", "9adech hedha"],
+  ["قداش الثمن", "9adech el themen"],
+  ["فين تمشي", "win temchi"],
+  ["منين جاي", "mnin jay"],
+  ["وقتاش نمشي", "wa9tech nemchi"],
+  ["كيفاش نعمل", "kifech na3mel"],
+  ["علاش هكا", "3lech hakka"]
+];
+
+/* حروف وأرقام العربيزي الفردية */
+const charMap = {
+  'ش': 'ch', 'خ': 'kh', 'غ': 'gh', 'ح': '7', 'ع': '3', 'ق': '9',
+  'ة': 'a', 'ى': 'a', 'أ': 'a', 'إ': 'e', 'آ': 'a', 'ئ': 'e', 'ؤ': 'ou',
+  'ث': 'th', 'ذ': 'dh', 'ض': 'dh', 'ظ': 'dh', 'ص': 's', 'ط': 't',
+  'ز': 'z', 'س': 's', 'ي': 'i', 'و': 'ou', 'ب': 'b', 'ت': 't',
+  'ن': 'n', 'م': 'm', 'ل': 'l', 'ر': 'r', 'د': 'd', 'ف': 'f',
+  'ك': 'k', 'ه': 'h', 'ج': 'j', 'ا': 'a', 'ء': ''
+};
+
+/* بناء قاموس عكسي (عربيزي → تونسي) */
+const reverseDictionary = {};
+dictionary.forEach(([ar, lat]) => {
+  const key = lat.toLowerCase().trim();
+  if (!reverseDictionary[key]) reverseDictionary[key] = ar;
+});
+
+/* حالة الاتجاه */
+let direction = 'ar2lat'; // ar2lat أو lat2ar
+
+/* دالة الترجمة الرئيسية */
+function translateText() {
+  const src = document.getElementById('srcText').value.trim();
+  const tgt = document.getElementById('tgtText');
+  const status = document.getElementById('status');
+  
+  if (!src) {
+    setStatus('⚠️ الرجاء إدخال نص للترجمة', 'error');
+    return;
+  }
+  
+  try {
+    let result = (direction === 'ar2lat') 
+      ? translateArabicToLatin(src) 
+      : translateLatinToArabic(src);
+    
+    tgt.value = result;
+    setStatus('✅ تمت الترجمة بنجاح', 'success');
+  } catch (e) {
+    setStatus('❌ حدث خطأ في الترجمة', 'error');
+    console.error(e);
+  }
+}
+
+/* عربي تونسي → عربيزي */
+function translateArabicToLatin(text) {
+  let result = text;
+  
+  // 1. استبدال العبارات الكاملة أولاً (الأطول أولاً)
+  const sortedDict = [...dictionary].sort((a, b) => b[0].length - a[0].length);
+  sortedDict.forEach(([ar, lat]) => {
+    const regex = new RegExp(escapeRegex(ar), 'g');
+    result = result.replace(regex, lat);
+  });
+  
+  // 2. استبدال الحروف المتبقية
+  let out = '';
+  for (const ch of result) {
+    if (charMap[ch] !== undefined) {
+      out += charMap[ch];
+    } else {
+      out += ch;
+    }
+  }
+  
+  // 3. تنظيف المسافات
+  return out.replace(/\s+/g, ' ').trim();
+}
+
+/* عربيزي → عربي تونسي */
+function translateLatinToArabic(text) {
+  let result = text;
+  
+  // 1. استبدال الكلمات الكاملة (الأطول أولاً)
+  const sortedReverse = Object.keys(reverseDictionary).sort((a, b) => b.length - a.length);
+  sortedReverse.forEach(lat => {
+    const regex = new RegExp('\\b' + escapeRegex(lat) + '\\b', 'gi');
+    result = result.replace(regex, reverseDictionary[lat]);
+  });
+  
+  // 2. استبدال الأرقام العربية المتعارف عليها
+  const numMap = {
+    '7': 'ح', '3': 'ع', '9': 'ق', '2': 'ء', '5': 'خ', '6': 'ط'
+  };
+  Object.keys(numMap).forEach(num => {
+    result = result.replace(new RegExp(num, 'g'), numMap[num]);
+  });
+  
+  // 3. استبدال تراكيب الحروف اللاتينية
+  const comboMap = [
+    ['ch', 'ش'], ['kh', 'خ'], ['gh', 'غ'], ['th', 'ث'], ['dh', 'ذ'],
+    ['ou', 'و'], ['sh', 'ش'], ['aa', 'ا'], ['ee', 'ي'], ['oo', 'و']
+  ];
+  comboMap.forEach(([lat, ar]) => {
+    result = result.replace(new RegExp(lat, 'gi'), ar);
+  });
+  
+  // 4. الحروف المفردة
+  const singleMap = {
+    'a': 'ا', 'b': 'ب', 'c': 'ك', 'd': 'د', 'e': 'ي', 'f': 'ف',
+    'g': 'ق', 'h': 'ه', 'i': 'ي', 'j': 'ج', 'k': 'ك', 'l': 'ل',
+    'm': 'م', 'n': 'ن', 'o': 'و', 'p': 'ب', 'q': 'ق', 'r': 'ر',
+    's': 'س', 't': 'ت', 'u': 'و', 'v': 'ف', 'w': 'و', 'x': 'كس',
+    'y': 'ي', 'z': 'ز'
+  };
+  let out = '';
+  for (const ch of result) {
+    const lower = ch.toLowerCase();
+    if (singleMap[lower] !== undefined && /[a-zA-Z]/.test(ch)) {
+      out += singleMap[lower];
+    } else {
+      out += ch;
+    }
+  }
+  
+  return out.replace(/\s+/g, ' ').trim();
+}
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/* ============ النطق الصوتي ============ */
+function speakText(id) {
+  const text = document.getElementById(id).value.trim();
+  if (!text) {
+    setStatus('⚠️ لا يوجد نص للنطق', 'error');
+    return;
+  }
+  
+  if (!('speechSynthesis' in window)) {
+    setStatus('❌ متصفحك لا يدعم النطق الصوتي', 'error');
+    return;
+  }
+  
+  window.speechSynthesis.cancel();
+  
+  const utter = new SpeechSynthesisUtterance(text);
+  
+  // تحديد اللغة حسب المحتوى
+  const isArabic = /[\u0600-\u06FF]/.test(text);
+  utter.lang = isArabic ? 'ar-TN' : 'fr-FR';
+  utter.rate = 0.9;
+  utter.pitch = 1;
+  
+  // محاولة اختيار صوت مناسب
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v => v.lang.startsWith(isArabic ? 'ar' : 'fr'));
+  if (preferred) utter.voice = preferred;
+  
+  utter.onstart = () => setStatus('🔊 جاري النطق...', 'success');
+  utter.onend = () => setStatus('✅ انتهى النطق', 'success');
+  utter.onerror = (e) => setStatus('❌ خطأ في النطق', 'error');
+  
+  window.speechSynthesis.speak(utter);
+}
+
+/* تحميل الأصوات */
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+
+/* ============ وظائف مساعدة ============ */
+function clearText(id) {
+  document.getElementById(id).value = '';
+  setStatus('🗑️ تم المسح', 'success');
+}
+
+function swapLanguages() {
+  const src = document.getElementById('srcText');
+  const tgt = document.getElementById('tgtText');
+  const tmp = src.value;
+  src.value = tgt.value;
+  tgt.value = tmp;
+  
+  direction = (direction === 'ar2lat') ? 'lat2ar' : 'ar2lat';
+  
+  const labels = document.querySelectorAll('.lang-label span');
+  if (direction === 'ar2lat') {
+    labels[0].textContent = '🇹🇳 اللهجة التونسية (عربي)';
+    labels[1].textContent = '🔤 العربيزي (Latin)';
+  } else {
+    labels[0].textContent = '🔤 العربيزي (Latin)';
+    labels[1].textContent = '🇹🇳 اللهجة التونسية (عربي)';
+  }
+  
+  setStatus('🔄 تم عكس الاتجاه', 'success');
+}
+
+function setStatus(msg, cls) {
+  const s = document.getElementById('status');
+  s.textContent = msg;
+  s.className = 'status ' + (cls || '');
+  if (cls === 'success') {
+    clearTimeout(window._statusTimer);
+    window._statusTimer = setTimeout(() => {
+      s.textContent = '';
+      s.className = 'status';
+    }, 3000);
+  }
+}
+
+/* اختصارات لوحة المفاتيح */
+document.getElementById('srcText').addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.key === 'Enter') translateText();
+});
+</script></body>
+</html>
+```📋 شرح المميزات الكاملة:
+
+✅ الترجمة الدقيقة
+
+· قاموس شامل يحتوي على أكثر من 200 كلمة وعبارة من اللهجة التونسية مترجمة للعربيزي والعكس
+· مطابقة العبارات الكاملة أولاً (مثل "شنوة حالك" → "chnowa 7alek") قبل ترجمة الحروف
+· ترتيب ذكي حسب طول العبارة لضمان الدقة
+· ترجمة حرف بحرف للكلمات غير الموجودة في القاموس
+
+🔊 النطق الصوتي
+
+· زر 🔊 بجانب كل مربع نص
+· يكتشف اللغة تلقائياً (عربي → صوت عربي، عربيزي → صوت فرنسي)
+· يعمل على جميع المتصفحات الحديثة (Chrome, Edge, Safari)
+
+🔄 مميزات إضافية
+
+· زر عكس الاتجاه للتبديل بين تونسي↔عربيزي
+· اختصار Ctrl+Enter للترجمة السريعة
+· تصميم متجاوب مع الجوال
+· إشعارات حالة واضحة
+
+🗣️ أمثلة على الترجمة
+
+التونسي العربيزي
+شنوة حالك؟ chnowa 7alek?
+لاباس عليك labbas 3lik
+برشا شكرا barsha chokran
